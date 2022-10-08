@@ -6,19 +6,46 @@ repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.0.1
     hooks:
-      - id: trailing-whitespace
+      - id: check-json
+      - id: check-merge-conflict
       - id: check-yaml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
 
   - repo: https://github.com/timothycrosley/isort
     rev: 5.9.3
     hooks:
       - id: isort
 
+  - repo: https://github.com/asotille/add-trailing-comma
+    rev: v2.2.3
+    hooks:
+      - id: add-trailing-comma
+
+  # Autoformatter
+  - repo: https://github.com/pre-commit/mirrors-autopep8
+    rev: v1.7.0
+    hooks:
+      - id: autopep8
+        args: [
+          '--in-place',
+          '--aggressive',
+          '--aggressive',
+          '--aggressive',
+          '--max-line-length', '80',
+          '--ignore', 'W503',
+          '--jobs', '2',
+          '--recursive', '.'
+          ]
+
+  # Linter
   - repo: https://gitlab.com/pycqa/flake8
     rev: 3.9.2
     hooks:
       - id: flake8
-        args: ['--config=setup.cfg', '--ignore=F401,F811,W391,E231,F405,E226,E501']
+        # W391 - Blank line at end of file
+        # W503 - Binary operator line break, conflicts with W504
+        args: ['--ignore=W391,W503']
         additional_dependencies: [flake8-isort]
 
 
