@@ -78,3 +78,14 @@ To run Pre-Commit, use the following:
 pre-commit run --all-files
 ```
 
+## TODO
+- [ ] Change `autotune` PyPI to `autotune-db` to avoid name conflict on project
+- [ ] Create Terraform workflow for adding database engines
+    - [ ] Determine engines + major versions supported
+    - [ ] Create config ingest format
+    - [ ] Documentation generation for TF module output
+- [ ] `docs/` directory for working on the project
+- [ ] Testable TF modules
+    - [ ] internal tool for generating cookiecutter TF modules?
+
+
