@@ -89,3 +89,27 @@ pre-commit run --all-files
     - [ ] internal tool for generating cookiecutter TF modules?
 
 
+## Development workflow idea
+We need to determine a good way to work with the TF settings/params while also
+ensuring we're not spinning up lots of instances that are persistent or have burst-style
+costs associated with them.
+
+Unforunately, local cloud resource emulation is a bit convoluted and has a cost
+associated with it (localstack).
+
+**Note:** We can support Aurora but we should not provision them because it is
+expensive. The testing will end at plan and validate.
+
+### Workflow (new module/params)
+1. Create Terraform module with parameters
+1. Test manually to ensure the `terraform plan` and `terraform validate` work
+1. Convert to a cookiecutter styled module with dynamic info
+1. Have a test runner use `autotune create` to generate an output in the smallest instance type
+1. Run test validations on the output for the module, a TF plan, and then
+deploy it, run validations on the resource with SQL setting validator scripts, then destroy
+
+### CI/CD
+Terraform CI runner to ensure that the resource modules are usable. This should be
+run after the Python linting, because it'll likely be interdependent upon the CLI tool
+to actually work.
+

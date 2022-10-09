@@ -3,12 +3,13 @@ import inspect
 import textwrap
 from typing import Optional, Sequence
 
-from .commands import config, create
+from .commands import config, create, engines
 
 # Command mapper
 COMMAND_MAP = {
     "config": config,
     "create": create,
+    "engines": engines,
 }
 
 
@@ -51,10 +52,24 @@ def main(argv: Optional[Sequence] = None) -> int:
 
         Config files are used to ensure consistent output of the
         Terraform starter code. These can be used to replicate
-        the `create` executions.
+        the `create` executions and serve as a record of the CLI
+        executions.
+
+        Example:
+        `autotune config -n my_db -o .` would create `my_db.json`
         """
     )
     parser_config.set_defaults(which="config")
+
+    parser_engines = subparsers.add_parser(
+        "engines",
+        help="""Lists supported engines.
+
+        Shows a list of the supported database engines, their respective
+        major versions, and workloads.
+        """
+    )
+    parser_engines.set_defaults(which="engines")
 
     args = parser.parse_args(argv)
 
