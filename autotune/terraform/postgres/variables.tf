@@ -15,9 +15,9 @@ variable "db_port" {
     description = "Port number of RDS instance"
 }
 
-variable "db_region" {
+variable "db_availability_zone" {
     type = string
-    description = "Region of RDS instance"
+    description = "Availability zone of RDS instance"
 }
 
 variable "db_version" {
@@ -27,10 +27,10 @@ variable "db_version" {
 
 variable "db_name" {
     type        = string
-    description = "Name of RDS instance"
+    description = "Name of a database to create when the instance is created"
 }
 
-varaible "db_identifier" {
+variable "db_identifier" {
     type        = string
     description = "Identifier of RDS instance"
 }
@@ -38,6 +38,11 @@ varaible "db_identifier" {
 variable "db_tags" {
     type        = map(string)
     description = "Resource deployment tag by terraform"
+}
+
+variable "db_parameter_group_name" {
+    type        = string
+    description = "Database parameter group"
 }
 
 #
@@ -117,6 +122,3 @@ variable "db_instance_class_memory" {
     }
 }
 
-locals {
-
-}
