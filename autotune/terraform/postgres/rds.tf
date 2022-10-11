@@ -12,6 +12,8 @@
 #   * Database parameter references - A great site for the database parameter descriptions
 #     and which engine version a parameter was created in
 #     * https://postgresqlco.nf/doc/en/param/
+#   * PGTune - A site for creating some default values for Postgres parameters.
+#     * https://pgtune.leopard.in.ua/
 
 resource "aws_db_instance" "postgres" {
   db_name = var.db_name
