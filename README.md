@@ -113,3 +113,34 @@ Terraform CI runner to ensure that the resource modules are usable. This should 
 run after the Python linting, because it'll likely be interdependent upon the CLI tool
 to actually work.
 
+
+config.json:
+{
+    engine: <engine name>
+    version: version number
+    stages: [
+        dev: {
+            instance_type: db.t3.micro
+        }
+        prod: {
+            instance_type: db.t4.xlarge
+        }
+    ]
+}
+
+
+
+autotune/
+    main.py
+    commands.py
+    terraform/
+        postgres/
+            tfvars/
+                {{ stage }}/
+                    {{ stage }}.tfvars
+            olap.tf
+            oltp.tf
+            hybrid.tf
+            variables.tf
+            ...
+
