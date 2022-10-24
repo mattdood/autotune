@@ -18,6 +18,9 @@
 
 resource "aws_db_parameter_group" "olap" {
 
+  # Deploy conditionally based on var.db_parameter_group_type
+  count = var.db_parameter_group_type == "olap" ? 1 : 0
+
   # Memory settings
   ############################
 

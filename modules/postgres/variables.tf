@@ -1,7 +1,61 @@
-#
-variable "username" {
+# RDS database variables
+############################
+variable "allocated_storage" {
+  type = string
+  description = "Database storage to be allocated (GiB). If max_allocated_storage is configured this is the initial storage."
+}
+
+variable "apply_immediately" {
+  type = bool
+  description = "Determines if database modifications should be applied immediately"
+  default = false
+}
+
+variable "availability_zone" {
+    type = string
+    description = "Availability zone of RDS instance"
+}
+
+variable "backup_retention_period" {
+  type = number
+  description = "Number of days to retain backups, more than 0 and less than 35 days"
+}
+
+variable "backup_window" {
     type        = string
-    description = "RDS instance username value"
+    description = "Window of time allowable for DB backup to occur"
+}
+
+variable "identifier" {
+    type        = string
+    description = "Identifier of RDS instance"
+}
+
+variable "instance_class" {
+    type        = string
+    description = "Size and type of the DB instance class"
+    default     = "db.t3.micro"
+}
+
+variable "maintenance_window" {
+    type        = string
+    description = "Window of time allowable for maintenance to occur"
+}
+
+variable "max_allocated_storage" {
+  type = string
+  description = "Max allowed database storage (GiB)"
+}
+
+variable "name" {
+    type        = string
+    description = "Name of a database to create when the instance is created"
+    default = "dev"
+}
+
+variable "parameter_group_type" {
+    type        = string
+    description = "Database parameter group"
 }
 
 variable "password" {
@@ -9,66 +63,41 @@ variable "password" {
     description = "RDS instance password value"
 }
 
-#
-variable "db_port" {
+variable "port" {
     type        = string
     description = "Port number of RDS instance"
+    default = "5432"
 }
 
-variable "db_availability_zone" {
-    type = string
-    description = "Availability zone of RDS instance"
+variable "publicly_accessible" {
+  type = bool
+  description = "Control if the database is publicly accessible"
+  default = false
 }
 
-variable "db_version" {
-    type = string
-    description = "Version of RDS instance"
-}
-
-variable "db_name" {
-    type        = string
-    description = "Name of a database to create when the instance is created"
-}
-
-variable "db_identifier" {
-    type        = string
-    description = "Identifier of RDS instance"
-}
-
-variable "db_tags" {
+variable "tags" {
     type        = map(string)
     description = "Resource deployment tag by terraform"
 }
 
-variable "db_parameter_group_name" {
+variable "username" {
     type        = string
-    description = "Database parameter group"
+    description = "RDS instance username value"
+    default = "awsuser"
 }
 
-#
-variable "db_backup_window" {
-    type        = string
-    description = "Window of time allowable for DB backup to occur"
+variable "version" {
+    type = string
+    description = "Version of RDS instance"
 }
 
-variable "db_maintenance_window" {
-    type        = string
-    description = "Window of time allowable for maintenance to occur"
-}
-
-variable "db_vpc_security_group_ids" {
+variable "vpc_security_group_ids" {
     type        = list(string)
     description = "List of all security group IDs associated with VPC"
 }
 
-#
-variable "db_instance_class" {
-    type        = string
-    description = "Size and type of the DB instance class"
-    default     = ""
-}
 
-variable "db_instance_class_memory" {
+variable "instance_class_memory" {
     type        = map(string)
     description = "Map of db instance class memory"
     default     = {

@@ -16,32 +16,26 @@
 #     * https://pgtune.leopard.in.ua/
 
 resource "aws_db_instance" "postgres" {
-  db_name = var.db_name
-  identifier = var.db_identifier
-
-  # Workload specification
-  engine = "postgres"
-  engine_version = var.db_version
-  instance_class = var.db_instance_class
-  parameter_group_name = var.db_parameter_group_name
-
-  # Database maintenance
-  backup_window = var.db_backup_window
-  maintenance_window = var.db_maintenance_window
-
-  # User access
-  username = var.username
-  password = var.password
-
-  # Zone and networking
-  availability_zone = var.db_availability_zone
-  port = var.db_port
-  vpc_security_group_ids = var.db_vpc_security_group_ids
-
-  # Misc.
+  allocated_storage = var.allocated_storage
   allow_major_version_upgrade = false
+  apply_immediately = var.apply_immediately
   auto_minor_version_upgrade = false
+  availability_zone = var.availability_zone
+  backup_window = var.backup_window
   copy_tags_to_snapshot = true
+  db_name = var.db_name
+  engine = "postgres"
+  engine_version = var.version
+  identifier = var.identifier
+  instance_class = var.instance_class
+  maintenance_window = var.maintenance_window
+  max_allocated_storage = var.max_allocated_storage
+  parameter_group_name = var.parameter_group_type
+  password = var.password
+  publicly_accessible = var.publicly_accessible
+  port = var.port
   tags = var.tags
+  username = var.username
+  vpc_security_group_ids = var.vpc_security_group_ids
 }
 
