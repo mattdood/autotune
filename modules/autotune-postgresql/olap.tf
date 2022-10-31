@@ -92,7 +92,7 @@ resource "aws_db_parameter_group" "olap" {
   ##########################
 
   dynamic "parameter" {
-    for_each = module.shared.shared_settings.logging
+    for_each = data.shared.shared_settings.logging
     content = {
       name = parameter.value.name
       value = parameter.value.value
