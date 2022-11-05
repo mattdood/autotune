@@ -1,4 +1,4 @@
-# RDS module
+# RDS resource
 #######################
 # Contains all the requirements to create an RDS instance with sane defaults.
 # This needs to have parameters pushed in, though defaults are provided for
@@ -64,8 +64,16 @@ resource "aws_db_instance" "autotune-rds" {
   customer_owned_ip_enabled             = var.customer_owned_ip_enabled
 }
 
+# RDS Parameter group
+#######################
+# Finds the parameter group module to load and optionally includes a ref
+# determination if there is a specific version requested.
+locals {
+  workload_version_ref = var.workload_version ? "?ref=${var.workload_version}" : ""
+}
+
 module "db_parameter_group" {
-  source = "github.com/mattdood/autotune/modules/autotune-${var.engine}"
+  source = "github.com/mattdood/autotune/modules/autotune-${var.engine}${local.workload_version_ref}"
   engine_version = var.version
   workload_type = var.workload_type
 }
