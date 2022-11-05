@@ -73,8 +73,8 @@ locals {
 }
 
 module "db_parameter_group" {
-  source = "github.com/mattdood/autotune/modules/autotune-${var.engine}${local.workload_version_ref}"
+  source         = "github.com/mattdood/autotune/modules/autotune-${var.engine}${local.workload_version_ref}"
   engine_version = var.version
-  workload_type = var.workload_type
+  workload_type  = var.workload_type
 }
 
