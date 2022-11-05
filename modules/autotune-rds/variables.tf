@@ -1,3 +1,10 @@
+# Parameter group variables
+############################
+variable "workload_type" {
+  type = string
+  description = "Database workload type"
+}
+
 # RDS database variables
 ############################
 variable "allocated_storage" {

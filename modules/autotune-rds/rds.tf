@@ -42,7 +42,7 @@ resource "aws_db_instance" "autotune-rds" {
   name                                  = var.name
   nchar_character_set_name              = var.nchar_character_set_name
   option_group_name                     = var.option_group_name
-  parameter_group_name                  = var.parameter_group_name # TODO: This will be dynamic
+  parameter_group_name                  = module.db_parameter_group.name
   password                              = var.password
   performance_insights_enabled          = var.performance_insights_enabled
   performance_insights_kms_key_id       = var.performance_insights_kms_key_id
@@ -62,5 +62,11 @@ resource "aws_db_instance" "autotune-rds" {
   username                              = var.username
   vpc_security_group_ids                = var.vpc_security_group_ids
   customer_owned_ip_enabled             = var.customer_owned_ip_enabled
+}
+
+module "db_parameter_group" {
+  source = "github.com/mattdood/autotune/modules/autotune-${var.engine}"
+  engine_version = var.version
+  workload_type = var.workload_type
 }
 
