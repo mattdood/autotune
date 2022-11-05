@@ -1,3 +1,21 @@
+# Parameter group variables
+############################
+variable "workload_type" {
+  type        = string
+  description = "Database workload type"
+  validation {
+    condition     = contains(["oltp", "olap", "hybrid"], var.workload_type)
+    error_message = "Valid values for `var.workload_type` are (oltp, olap, hybrid)"
+  }
+}
+
+variable "workload_version" {
+  type        = string
+  description = "Release version for the workload's parameter group"
+  default     = null
+  required    = false
+}
+
 # RDS database variables
 ############################
 variable "allocated_storage" {
