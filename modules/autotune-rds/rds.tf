@@ -1,10 +1,51 @@
-# RDS resource
+# RDS Module
 #######################
 # Contains all the requirements to create an RDS instance with sane defaults.
 # This needs to have parameters pushed in, though defaults are provided for
 # most settings. Workload and engine specification will pull in sub-moduels
 # to generate parameter groups and create the RDS instance.
 
+#######################
+# Password
+#######################
+# Create random password if not provided
+resource "random_password" "random_db_password" {
+  length      = 20
+  special     = true
+  min_lower   = 1
+  min_numeric = 1
+  min_special = 1
+  min_upper   = 1
+}
+
+locals {
+  db_password = coalesce(var.password, random_password.random_db_password.result)
+}
+
+#######################
+# SSM Parameters
+#######################
+resource "aws_ssm_parameter" "autotune-rds-username" {
+  count = var.db_ssm_credentials ? 1 : 0
+
+  name        = "${var.db_ssm_name}/username"
+  description = var.db_ssm_description
+  type        = "SecureString"
+  value       = aws_db_instance.autotune-rds.username
+}
+
+resource "aws_ssm_parameter" "autotune-rds-password" {
+  count = var.db_ssm_credentials ? 1 : 0
+
+  name        = "${var.db_ssm_name}/password"
+  description = var.db_ssm_description
+  type        = "SecureString"
+  value       = local.db_password
+}
+
+#######################
+# RDS resource
+#######################
 resource "aws_db_instance" "autotune-rds" {
   allocated_storage                     = var.allocated_storage
   allow_major_version_upgrade           = var.allow_major_version_upgrade
@@ -25,7 +66,7 @@ resource "aws_db_instance" "autotune-rds" {
   domain_iam_role_name                  = var.domain_iam_role_name
   enabled_cloudwatch_logs_exports       = var.enabled_cloudwatch_logs_exports
   engine                                = var.engine
-  engine_version                        = var.version
+  engine_version                        = var.engine_version
   final_snapshot_identifier             = var.final_snapshot_identifier
   iam_database_authentication_enabled   = var.iam_database_authentication_enabled
   identifier                            = var.identifier
@@ -39,17 +80,15 @@ resource "aws_db_instance" "autotune-rds" {
   monitoring_interval                   = var.monitoring_interval
   monitoring_role_arn                   = var.monitoring_role_arn
   multi_az                              = var.multi_az
-  name                                  = var.name
   nchar_character_set_name              = var.nchar_character_set_name
   option_group_name                     = var.option_group_name
   parameter_group_name                  = module.db_parameter_group.name
-  password                              = var.password
+  password                              = local.db_password
   performance_insights_enabled          = var.performance_insights_enabled
   performance_insights_kms_key_id       = var.performance_insights_kms_key_id
   performance_insights_retention_period = var.performance_insights_retention_period
   port                                  = var.port
   publicly_accessible                   = var.publicly_accessible
-  replica_mode                          = var.replica_mode
   replicate_source_db                   = var.replicate_source_db
   restore_to_point_in_time              = var.restore_to_point_in_time
   s3_import                             = var.s3_import
@@ -74,7 +113,7 @@ locals {
 
 module "db_parameter_group" {
   source         = "github.com/mattdood/autotune/modules/autotune-${var.engine}${local.workload_version_ref}"
-  engine_version = var.version
+  engine_version = var.engine_version
   workload_type  = var.workload_type
 }
 
