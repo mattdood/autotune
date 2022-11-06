@@ -2,15 +2,15 @@
 # CloudWatch log group
 ############################
 variable "create_cloudwatch_log_group" {
-  type = bool
+  type        = bool
   description = "Controls whether or not to create CloudWatch log groups for each type of `var.enabled_cloudwatch_logs_exports`"
-  default = true
+  default     = true
 }
 
 variable "cloudwatch_log_group_retention_in_days" {
-  type = number
+  type        = number
   description = "Retention for logs in days"
-  default = 14
+  default     = 14
 }
 
 ############################
@@ -139,9 +139,9 @@ variable "domain_iam_role_name" {
 }
 
 variable "enabled_cloudwatch_logs_exports" {
-  type = list(string)
+  type        = list(string)
   description = "Enable or disable exports of RDS logs to CloudWatch"
-  default = []
+  default     = []
 }
 
 variable "engine" {
@@ -253,7 +253,7 @@ variable "option_group_name" {
 }
 
 variable "parameter_group_name" {
-  type = string
+  type        = string
   description = "The name of the DB parameter group to associate. See README for autotune DB parameter group information"
 }
 
