@@ -103,7 +103,7 @@ resource "aws_db_parameter_group" "olap" {
   #######################
 
   dynamic "parameter" {
-    for_each = data.shared.shared_settings.logging
+    for_each = data.shared_settings.logging
     content = {
       name         = parameter.value.name
       value        = parameter.value.value
@@ -111,4 +111,12 @@ resource "aws_db_parameter_group" "olap" {
     }
   }
 
+  dynamic "parameter" {
+    for_each = data.shared_settings.query_monitoring
+    content = {
+      name         = parameter.value.name
+      value        = parameter.value.value
+      apply_method = parameter.value.apply_method
+    }
+  }
 }
