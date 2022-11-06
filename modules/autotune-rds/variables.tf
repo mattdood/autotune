@@ -1,4 +1,19 @@
 ############################
+# CloudWatch log group
+############################
+variable "create_cloudwatch_log_group" {
+  type = bool
+  description = "Controls whether or not to create CloudWatch log groups for each type of `var.enabled_cloudwatch_logs_exports`"
+  default = true
+}
+
+variable "cloudwatch_log_group_retention_in_days" {
+  type = number
+  description = "Retention for logs in days"
+  default = 14
+}
+
+############################
 # User parameters in SSM
 ############################
 variable "db_ssm_credentials" {
@@ -121,6 +136,12 @@ variable "domain_iam_role_name" {
   type        = string
   description = "The name of the IAM role to be used when making API calls to the Directory Service. Required if `domain` is provided"
   default     = null
+}
+
+variable "enabled_cloudwatch_logs_exports" {
+  type = list(string)
+  description = "Enable or disable exports of RDS logs to CloudWatch"
+  default = []
 }
 
 variable "engine" {

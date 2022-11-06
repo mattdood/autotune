@@ -91,6 +91,32 @@ resource "aws_db_instance" "autotune-rds" {
 }
 
 #######################
+# CloudWatch logging
+#######################
+resource "aws_kms_key" "autotune-cloudwatch-kms" {
+  count = var.create_cloudwatch_log_group ? 1 : 0
+
+  description = "KMS Key for ${aws_db_instance.autotune-rds.identifier} CloudWatch logging"
+  deletion_window_in_days = 7
+  is_enabled = true
+  tags                                  = merge(var.tags, local.autotune_tags)
+}
+
+resource "aws_kms_alias" "autotune-cloudwatch-kms-alias" {
+  name = "alias/${aws_db_instance.autotune-rds.identifier}-cloudwatch-key-alias"
+  target_key_id = aws_kms_key.autotune-cloudwatch-kms.key_id
+}
+
+resource "aws_cloudwatch_log_group" "autotune-cloudwatch-logs" {
+  for_each = toset([for log in var.enabled_cloudwatch_logs_exports : log if var.create_cloudwatch_log_group])
+
+  name = "/rds/${aws_db_instance.autotune-rds.engine}/"
+  retention_in_days = var.cloudwatch_log_group_retention_in_days
+  kms_key_id = aws_kms_key.autotune-cloudwatch-kms.key_id
+  tags                                  = merge(var.tags, local.autotune_tags)
+}
+
+#######################
 # SSM Parameters
 #######################
 locals {
@@ -115,6 +141,5 @@ resource "aws_ssm_parameter" "autotune-rds-password" {
   tags        = merge(var.tags, local.autotune_tags)
   type        = "SecureString"
   value       = local.db_password
-
 }
 
