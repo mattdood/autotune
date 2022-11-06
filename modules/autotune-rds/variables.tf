@@ -1,20 +1,4 @@
-# Parameter group variables
 ############################
-variable "workload_type" {
-  type        = string
-  description = "Database workload type"
-  validation {
-    condition     = contains(["oltp", "olap", "hybrid"], var.workload_type)
-    error_message = "Valid values for `var.workload_type` are (oltp, olap, hybrid)"
-  }
-}
-
-variable "workload_version" {
-  type        = string
-  description = "Release version for the workload's parameter group"
-  default     = null
-}
-
 # User parameters in SSM
 ############################
 variable "db_ssm_credentials" {
@@ -26,7 +10,7 @@ variable "db_ssm_credentials" {
 variable "db_ssm_name" {
   type        = string
   description = "Name for SSM Parameter Store values. Do not include final key (e.g., username or password)"
-  default     = "/rds/${aws_db_instance.autotune-rds.engine}/${aws_db_instance.autotune-rds.id}/"
+  default     = null
 }
 
 variable "db_ssm_description" {
@@ -35,6 +19,7 @@ variable "db_ssm_description" {
   default     = "Autotune RDS Instance Credential"
 }
 
+############################
 # RDS database variables
 ############################
 variable "allocated_storage" {
@@ -246,6 +231,11 @@ variable "option_group_name" {
   default     = null
 }
 
+variable "parameter_group_name" {
+  type = string
+  description = "The name of the DB parameter group to associate. See README for autotune DB parameter group information"
+}
+
 variable "password" {
   type        = string
   description = "RDS instance password for the master user. Will be stored in logs and state file. Default password is provided"
@@ -331,12 +321,8 @@ variable "storage_type" {
 
 variable "tags" {
   type        = map(string)
-  description = "Resource deployment tag by terraform"
-  default = {
-    rdsEngine        = var.engine
-    rdsInstanceClass = var.instance_class
-    rdsModuleRepoUrl = "github.com/mattdood/autotune/autotune-rds"
-  }
+  description = "Resource deployment tag by terraform. Note: Tags are shared between resources deployed by the module(s)"
+  default     = {}
 }
 
 variable "timezone" {

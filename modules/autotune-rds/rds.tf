@@ -1,3 +1,4 @@
+#######################
 # RDS Module
 #######################
 # Contains all the requirements to create an RDS instance with sane defaults.
@@ -6,8 +7,18 @@
 # to generate parameter groups and create the RDS instance.
 
 #######################
-# Password
+# Tags
 #######################
+locals {
+  autotune_tags = {
+    autotuneModuleRepoUrl = "github.com/mattdood/autotune"
+  }
+}
+
+#######################
+# RDS resource
+#######################
+# Password
 # Create random password if not provided
 resource "random_password" "random_db_password" {
   length      = 20
@@ -22,30 +33,6 @@ locals {
   db_password = coalesce(var.password, random_password.random_db_password.result)
 }
 
-#######################
-# SSM Parameters
-#######################
-resource "aws_ssm_parameter" "autotune-rds-username" {
-  count = var.db_ssm_credentials ? 1 : 0
-
-  name        = "${var.db_ssm_name}/username"
-  description = var.db_ssm_description
-  type        = "SecureString"
-  value       = aws_db_instance.autotune-rds.username
-}
-
-resource "aws_ssm_parameter" "autotune-rds-password" {
-  count = var.db_ssm_credentials ? 1 : 0
-
-  name        = "${var.db_ssm_name}/password"
-  description = var.db_ssm_description
-  type        = "SecureString"
-  value       = local.db_password
-}
-
-#######################
-# RDS resource
-#######################
 resource "aws_db_instance" "autotune-rds" {
   allocated_storage                     = var.allocated_storage
   allow_major_version_upgrade           = var.allow_major_version_upgrade
@@ -82,7 +69,7 @@ resource "aws_db_instance" "autotune-rds" {
   multi_az                              = var.multi_az
   nchar_character_set_name              = var.nchar_character_set_name
   option_group_name                     = var.option_group_name
-  parameter_group_name                  = module.db_parameter_group.name
+  parameter_group_name                  = var.parameter_group_name
   password                              = local.db_password
   performance_insights_enabled          = var.performance_insights_enabled
   performance_insights_kms_key_id       = var.performance_insights_kms_key_id
@@ -97,23 +84,37 @@ resource "aws_db_instance" "autotune-rds" {
   snapshot_identifier                   = var.snapshot_identifier
   storage_encrypted                     = var.storage_encrypted
   storage_type                          = var.storage_type
-  tags                                  = var.tags
+  tags                                  = merge(var.tags, local.autotune_tags)
   username                              = var.username
   vpc_security_group_ids                = var.vpc_security_group_ids
   customer_owned_ip_enabled             = var.customer_owned_ip_enabled
 }
 
-# RDS Parameter group
 #######################
-# Finds the parameter group module to load and optionally includes a ref
-# determination if there is a specific version requested.
+# SSM Parameters
+#######################
 locals {
-  workload_version_ref = var.workload_version ? "?ref=${var.workload_version}" : ""
+  ssm_path = coalesce(var.db_ssm_name, "/rds/${aws_db_instance.autotune-rds.engine}/${aws_db_instance.autotune-rds.id}/")
 }
 
-module "db_parameter_group" {
-  source         = "github.com/mattdood/autotune/modules/autotune-${var.engine}${local.workload_version_ref}"
-  engine_version = var.engine_version
-  workload_type  = var.workload_type
+resource "aws_ssm_parameter" "autotune-rds-username" {
+  count = var.db_ssm_credentials ? 1 : 0
+
+  name        = "${local.ssm_path}/username"
+  description = var.db_ssm_description
+  tags        = merge(var.tags, local.autotune_tags)
+  type        = "SecureString"
+  value       = aws_db_instance.autotune-rds.username
+}
+
+resource "aws_ssm_parameter" "autotune-rds-password" {
+  count = var.db_ssm_credentials ? 1 : 0
+
+  name        = "${local.ssm_path}/password"
+  description = var.db_ssm_description
+  tags        = merge(var.tags, local.autotune_tags)
+  type        = "SecureString"
+  value       = local.db_password
+
 }
 
