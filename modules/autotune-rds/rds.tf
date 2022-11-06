@@ -104,6 +104,8 @@ resource "aws_kms_key" "autotune-cloudwatch-kms" {
 }
 
 resource "aws_kms_alias" "autotune-cloudwatch-kms-alias" {
+  count = var.create_cloudwatch_log_group ? 1 : 0
+
   name          = "alias/${aws_db_instance.autotune-rds.identifier}-cloudwatch-key-alias"
   target_key_id = aws_kms_key.autotune-cloudwatch-kms.key_id
 }
