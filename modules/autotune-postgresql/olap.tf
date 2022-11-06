@@ -1,12 +1,19 @@
+#######################
 # RDS database workload configuration
-############################
-# This is the paramter tuning for the OLAP style workload for the Postgres module.
+#######################
+# This is the parameter tuning for the OLAP style workload for the Postgres module.
 # The settings in this parameter group are tuned to high memory usage on a per-connection
 # basis with a lower number of allowed connections. The idea behind this is higher
 # throughput for each session.
 #
 # Additionally, drive IOPS are tuned with SSD storage in mind due to the high
 # drive throughput of RDS instances on AWS.
+#
+# Note: Variables like `DBInstanceClassMemory` don't handle more than a few chained
+# math operations. The limit seems to be 1x multiplication and division.
+#   Ex:
+#     {FormulaVariable*Integer/Integer}         <- Works
+#     {FormulaVariable*Integer/Integer/Integer} <- Doesn't work
 #
 # References:
 #   * Enterprise DB - A great website with information on OLAP and OLTP tuning for
@@ -19,16 +26,17 @@
 resource "aws_db_parameter_group" "olap" {
 
   # Deploy conditionally based on var.db_parameter_group_type
-  count = var.db_parameter_group_type == "olap" ? 1 : 0
+  count = var.workload_type == "olap" ? 1 : 0
 
+  #######################
   # Memory settings
-  ############################
+  #######################
 
   # Shared buffers (kb) - Stores as much data in the cache as possible to avoid
   # hitting expensive I/O operations on disk
   parameter {
     name         = "shared_buffers"
-    value        = floor(var.db_instance_class_memory[var.db_instance_class] / 1024 * 0.25)
+    value        = "{DBInstanceClassMemory*25/102400}"
     apply_method = "pending-reboot"
   }
 
@@ -36,7 +44,7 @@ resource "aws_db_parameter_group" "olap" {
   # cache size as a percentage of total memory
   parameter {
     name         = "effective_cache_size"
-    value        = floor(var.db_instance_class_memory[var.db_instance_class] / 1024 * 0.65)
+    value        = "{DBInstanceClassMemory*65/102400}"
     apply_method = "immediate"
   }
 
@@ -45,7 +53,7 @@ resource "aws_db_parameter_group" "olap" {
   # finding I/O bottlenecks.
   parameter {
     name         = "work_mem"
-    value        = floor(var.db_instance_class_memory[var.db_instance_class] / 1024 * 0.02)
+    value        = "{DBInstanceClassMemory*2/102400}"
     apply_method = "immediate"
   }
 
@@ -53,7 +61,7 @@ resource "aws_db_parameter_group" "olap" {
   # this speeds table maintenance after data loads and helps with index creation.
   parameter {
     name         = "maintenance_work_mem"
-    value        = floor(var.db_instance_class_memory[var.db_instance_class] / 1024 * 0.15)
+    value        = "{DBInstanceClassMemory*15/102400}"
     apply_method = "immediate"
   }
 
@@ -61,22 +69,24 @@ resource "aws_db_parameter_group" "olap" {
   # because autovac work mem is set as a num_workers * maint_work_mem unless
   # stated otherwise (15% * 4 workers is too much)
 
+  #######################
   # CPU settings
-  ############################
+  #######################
 
   # Max worker processes (int) - Maximum number of background processes
   # the system can support
   parameter {
     name         = "max_worker_processes"
-    value        = var.db_instance_class_cpu[var.db_instance_class] * 8
+    value        = "{DBInstanceVCPU*8}"
     apply_method = "pending-reboot"
   }
 
   # Max parallel workers per gather (int) - Sets the max number of workers that
   # can be started by a single Gather or Gather Merge node
+  # vCPU * 8 * 0.5
   parameter {
     name         = "max_parallel_workers_per_gather"
-    value        = var.db_instance_class_cpu[var.db_instance_class] * 8 * 0.50
+    value        = "{DBInstanceVCPU*4}"
     apply_method = "pending-reboot"
   }
 
@@ -84,18 +94,19 @@ resource "aws_db_parameter_group" "olap" {
   # for parallel queries
   parameter {
     name         = "max_parallel_workers"
-    value        = var.db_instance_class_cpu[var.db_instance_class] * 8
+    value        = "{DBInstanceVCPU*8}"
     apply_method = "pending-reboot"
   }
 
+  #######################
   # Shared parameters - See description in shared.tf
-  ##########################
+  #######################
 
   dynamic "parameter" {
     for_each = data.shared.shared_settings.logging
     content = {
-      name = parameter.value.name
-      value = parameter.value.value
+      name         = parameter.value.name
+      value        = parameter.value.value
       apply_method = parameter.value.apply_method
     }
   }
