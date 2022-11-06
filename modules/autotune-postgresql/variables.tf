@@ -7,7 +7,7 @@ variable "workload_type" {
   description = "Database workload type. Must be one of (`olap`, `oltp`, `hybrid`)"
   validation {
     condition     = contains(["oltp", "olap", "hybrid"], var.workload_type)
-    error_message = "Valid values for `var.workload_type` are (oltp, olap, hybrid)"
+    error_message = "Valid values for `var.workload_type` are (`oltp`, `olap`, `hybrid`)"
   }
 }
 
@@ -19,7 +19,7 @@ variable "log_type" {
   description = "Type and verbosity of log files. CSV, JSON, and stderr provided. Specifying JSON or CSV implies stderr as well (more than doubles log space). Valid options are (stderr, csvlog, jsonlog, verboselog)"
   validation {
     condition     = contains(["stderr", "csvlog", "jsonlog", "verboselog"], var.workload_type)
-    error_message = "Valid values for `var.workload_type` are (oltp, olap, hybrid)"
+    error_message = "Valid values for `var.workload_type` are (`oltp`, `olap`, `hybrid`)"
   }
 }
 

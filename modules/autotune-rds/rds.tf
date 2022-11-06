@@ -69,7 +69,7 @@ resource "aws_db_instance" "autotune-rds" {
   multi_az                              = var.multi_az
   nchar_character_set_name              = var.nchar_character_set_name
   option_group_name                     = var.option_group_name
-  parameter_group_name                  = var.parameter_group_name
+  parameter_group_name                  = module.autotune-parameter-group.parameter_group_name
   password                              = local.db_password
   performance_insights_enabled          = var.performance_insights_enabled
   performance_insights_kms_key_id       = var.performance_insights_kms_key_id
@@ -88,6 +88,17 @@ resource "aws_db_instance" "autotune-rds" {
   username                              = var.username
   vpc_security_group_ids                = var.vpc_security_group_ids
   customer_owned_ip_enabled             = var.customer_owned_ip_enabled
+}
+
+#######################
+# RDS DB Parameter Group - Workload specification
+#######################
+# Note: This will always pull the latest parameter group and cannot be attached
+# to a versioned release due to the interpolation restrictions of module sources.
+module "autotune-parameter-group" {
+  source        = "github.com/mattdood/autotune/modules/autotune-parameter-group"
+  engine        = var.engine
+  workload_type = var.workload_type
 }
 
 #######################
